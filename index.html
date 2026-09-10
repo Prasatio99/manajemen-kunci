@@ -50,6 +50,7 @@
             <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Dokumentasi (Foto)</label>
                 <input type="file" id="fotoPinjam" accept="image/*" capture="environment" required class="w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer border border-slate-200 rounded-xl bg-slate-50 p-1">
+                <p id="infoFotoPinjam" class="text-[11px] text-slate-400 mt-1"></p>
             </div>
 
             <button type="submit" id="btnSubmitPinjam" class="w-full bg-blue-600 text-white p-3.5 rounded-xl hover:bg-blue-700 active:scale-[0.98] font-bold text-sm shadow-lg shadow-blue-200 transition duration-200 mt-2">Simpan Peminjaman</button>
@@ -65,6 +66,7 @@
             <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Dokumentasi Pengembalian (Foto)</label>
                 <input type="file" id="fotoKembali" accept="image/*" capture="environment" required class="w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 cursor-pointer border border-slate-200 rounded-xl bg-slate-50 p-1">
+                <p id="infoFotoKembali" class="text-[11px] text-slate-400 mt-1"></p>
             </div>
 
             <button type="submit" id="btnSubmitKembali" class="w-full bg-green-600 text-white p-3.5 rounded-xl hover:bg-green-700 active:scale-[0.98] font-bold text-sm shadow-lg shadow-green-200 transition duration-200 mt-2">Proses Pengembalian</button>
@@ -76,6 +78,8 @@
 
     <script>
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx2znyWk0jQZ7PwNAbNhqM70YE96X9d6vXphkIzSpKROD4veiXuEcdJqKPpB_y8U85X/exec";
+        const MAX_DIMENSI_FOTO = 1280; // px, sisi terpanjang -- cukup untuk dokumentasi, tapi jauh lebih ringan
+        const KUALITAS_JPEG = 0.7;
 
         function switchTab(tab) {
             const formPinjam = document.getElementById('formPinjam');
@@ -109,11 +113,77 @@
             }
         }
 
+        // Tampilkan info ukuran file yang dipilih, sekaligus bantu memastikan file benar-benar terpilih
+        document.getElementById('fotoPinjam').addEventListener('change', function () {
+            tampilkanInfoFile(this, 'infoFotoPinjam');
+        });
+        document.getElementById('fotoKembali').addEventListener('change', function () {
+            tampilkanInfoFile(this, 'infoFotoKembali');
+        });
+
+        function tampilkanInfoFile(input, infoId) {
+            const info = document.getElementById(infoId);
+            if (input.files && input.files.length > 0) {
+                const file = input.files[0];
+                const ukuranKB = (file.size / 1024).toFixed(0);
+                info.innerText = "Terpilih: " + file.name + " (" + ukuranKB + " KB)";
+                info.className = "text-[11px] text-green-600 mt-1";
+            } else {
+                info.innerText = "";
+            }
+        }
+
+        // Mengecilkan & mengompres foto sebelum dikirim, supaya lebih ringan dan cepat diupload.
+        // Mengembalikan data URL base64 (string), bukan pernah undefined jika file valid.
+        function kompresFoto(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onerror = () => reject(new Error("Gagal membaca file foto."));
+                reader.onload = () => {
+                    const img = new Image();
+                    img.onerror = () => reject(new Error("Gagal memuat gambar untuk dikompres."));
+                    img.onload = () => {
+                        let { width, height } = img;
+                        if (width > height && width > MAX_DIMENSI_FOTO) {
+                            height = Math.round(height * (MAX_DIMENSI_FOTO / width));
+                            width = MAX_DIMENSI_FOTO;
+                        } else if (height > MAX_DIMENSI_FOTO) {
+                            width = Math.round(width * (MAX_DIMENSI_FOTO / height));
+                            height = MAX_DIMENSI_FOTO;
+                        }
+
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        const dataUrl = canvas.toDataURL('image/jpeg', KUALITAS_JPEG);
+                        if (!dataUrl || dataUrl === 'data:,') {
+                            reject(new Error("Hasil kompresi foto kosong."));
+                            return;
+                        }
+                        resolve(dataUrl);
+                    };
+                    img.src = reader.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
         async function handleForm(event, action) {
             event.preventDefault();
-            
+
             const submitBtn = action === 'pinjam' ? document.getElementById('btnSubmitPinjam') : document.getElementById('btnSubmitKembali');
             const statusMsg = document.getElementById('statusMsg');
+            const fileInput = action === 'pinjam' ? document.getElementById('fotoPinjam') : document.getElementById('fotoKembali');
+
+            // Validasi eksplisit di JS -- jaring pengaman selain atribut "required" di HTML
+            if (!fileInput.files || fileInput.files.length === 0) {
+                statusMsg.innerText = "Mohon pilih/ambil foto dokumentasi terlebih dahulu.";
+                statusMsg.className = "mt-4 text-center text-xs font-semibold text-red-600";
+                return;
+            }
 
             submitBtn.disabled = true;
             submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
@@ -124,28 +194,29 @@
 
             let payload = { action: action };
 
-            if (action === 'pinjam') {
-                payload.nama = document.getElementById('nama').value;
-                payload.divisi = document.getElementById('divisi').value;
-                payload.detailPT = document.getElementById('detailPT').value;
-                payload.kunci = document.getElementById('kunci').value;
-                
-                const fileInput = document.getElementById('fotoPinjam');
-                if (fileInput.files.length > 0) {
-                    payload.fotoBase64 = await toBase64(fileInput.files[0]);
-                    payload.mimeType = fileInput.files[0].type;
-                }
-            } else {
-                payload.id = document.getElementById('idKembali').value;
-                
-                const fileInput = document.getElementById('fotoKembali');
-                if (fileInput.files.length > 0) {
-                    payload.fotoBase64 = await toBase64(fileInput.files[0]);
-                    payload.mimeType = fileInput.files[0].type;
-                }
-            }
-
             try {
+                if (action === 'pinjam') {
+                    payload.nama = document.getElementById('nama').value;
+                    payload.divisi = document.getElementById('divisi').value;
+                    payload.detailPT = document.getElementById('detailPT').value;
+                    payload.kunci = document.getElementById('kunci').value;
+                } else {
+                    payload.id = document.getElementById('idKembali').value;
+                }
+
+                payload.fotoBase64 = await kompresFoto(fileInput.files[0]);
+                payload.mimeType = "image/jpeg"; // hasil kompresi selalu JPEG
+
+                // Debug: cek di console browser (F12) kalau masih ada masalah
+                console.log("Payload dikirim:", {
+                    ...payload,
+                    fotoBase64: payload.fotoBase64 ? payload.fotoBase64.substring(0, 40) + "... (" + payload.fotoBase64.length + " karakter)" : "KOSONG"
+                });
+
+                if (!payload.fotoBase64) {
+                    throw new Error("Konversi foto menghasilkan data kosong. Coba pilih ulang foto.");
+                }
+
                 const response = await fetch(WEB_APP_URL, {
                     method: 'POST',
                     body: JSON.stringify(payload)
@@ -156,28 +227,22 @@
                     statusMsg.innerText = result.pesan;
                     statusMsg.className = "mt-4 text-center text-xs font-semibold text-green-600";
                     event.target.reset();
-                    if(action === 'pinjam') checkDivisi();
+                    document.getElementById('infoFotoPinjam').innerText = "";
+                    document.getElementById('infoFotoKembali').innerText = "";
+                    if (action === 'pinjam') checkDivisi();
                 } else {
                     statusMsg.innerText = "Error: " + result.pesan;
                     statusMsg.className = "mt-4 text-center text-xs font-semibold text-red-600";
                 }
             } catch (error) {
-                statusMsg.innerText = "Terjadi kesalahan koneksi internet!";
+                console.error("Gagal mengirim form:", error);
+                statusMsg.innerText = "Terjadi kesalahan: " + error.message;
                 statusMsg.className = "mt-4 text-center text-xs font-semibold text-red-600";
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                 submitBtn.innerText = action === 'pinjam' ? "Simpan Peminjaman" : "Proses Pengembalian";
             }
-        }
-
-        function toBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(error);
-            });
         }
     </script>
 </body>
