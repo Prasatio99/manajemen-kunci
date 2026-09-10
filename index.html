@@ -2,30 +2,33 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sistem Manajemen Kunci</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 min-h-screen py-6 px-4">
-    <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-lg p-6">
-        <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Manajemen Kunci</h2>
+<body class="bg-slate-100 min-h-screen py-4 px-3 sm:py-8 sm:px-4 flex items-center justify-center">
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden p-5 sm:p-8">
+        <div class="text-center mb-6">
+            <h2 class="text-2xl font-black text-slate-800 tracking-tight">Manajemen Kunci</h2>
+            <p class="text-xs text-slate-500 mt-1">Silakan isi form di bawah dengan benar</p>
+        </div>
         
         <!-- Tab Navigasi -->
-        <div class="flex border-b mb-6">
-            <button id="btnPinjamTab" onclick="switchTab('pinjam')" class="flex-1 py-2 text-center font-semibold text-blue-600 border-b-2 border-blue-600">Peminjaman</button>
-            <button id="btnKembaliTab" onclick="switchTab('kembali')" class="flex-1 py-2 text-center font-semibold text-gray-500">Pengembalian</button>
+        <div class="flex bg-slate-100 p-1 rounded-xl mb-6">
+            <button id="btnPinjamTab" onclick="switchTab('pinjam')" class="flex-1 py-2.5 text-center text-sm font-bold rounded-lg transition-all duration-200 bg-white text-blue-600 shadow-sm">Peminjaman</button>
+            <button id="btnKembaliTab" onclick="switchTab('kembali')" class="flex-1 py-2.5 text-center text-sm font-bold rounded-lg transition-all duration-200 text-slate-500 hover:text-slate-800">Pengembalian</button>
         </div>
 
         <!-- Form Peminjaman -->
         <form id="formPinjam" onsubmit="handleForm(event, 'pinjam')" class="space-y-4">
             <div>
-                <label class="block text-sm font-medium text-gray-700">Nama Peminjam</label>
-                <input type="text" id="nama" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border">
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Nama Peminjam</label>
+                <input type="text" id="nama" required placeholder="Nama lengkap" class="w-full rounded-xl border-slate-200 bg-slate-50 shadow-sm p-3 border text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700">Divisi</label>
-                <select id="divisi" onchange="checkDivisi()" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border">
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Divisi</label>
+                <select id="divisi" onchange="checkDivisi()" class="w-full rounded-xl border-slate-200 bg-slate-50 shadow-sm p-3 border text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
                     <option value="ESRS">ESRS</option>
                     <option value="BO Eng">BO Eng</option>
                     <option value="HK">HK</option>
@@ -35,40 +38,40 @@
             </div>
 
             <div id="divDetailPT" class="hidden">
-                <label class="block text-sm font-medium text-gray-700">Detail PT (Nama Perusahaan)</label>
-                <input type="text" id="detailPT" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border">
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Detail PT (Perusahaan)</label>
+                <input type="text" id="detailPT" placeholder="Nama PT / Kontraktor" class="w-full rounded-xl border-slate-200 bg-slate-50 shadow-sm p-3 border text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700">Nama Kunci</label>
-                <input type="text" id="kunci" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border">
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Nama Kunci</label>
+                <input type="text" id="kunci" required placeholder="Contoh: Kunci Ruang Meeting A" class="w-full rounded-xl border-slate-200 bg-slate-50 shadow-sm p-3 border text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700">Dokumentasi (Foto)</label>
-                <input type="file" id="fotoPinjam" accept="image/*" capture="environment" required class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Dokumentasi (Foto)</label>
+                <input type="file" id="fotoPinjam" accept="image/*" capture="environment" required class="w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer border border-slate-200 rounded-xl bg-slate-50 p-1">
             </div>
 
-            <button type="submit" id="btnSubmitPinjam" class="w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700 font-semibold">Simpan Peminjaman</button>
+            <button type="submit" id="btnSubmitPinjam" class="w-full bg-blue-600 text-white p-3.5 rounded-xl hover:bg-blue-700 active:scale-[0.98] font-bold text-sm shadow-lg shadow-blue-200 transition duration-200 mt-2">Simpan Peminjaman</button>
         </form>
 
         <!-- Form Pengembalian -->
         <form id="formKembali" onsubmit="handleForm(event, 'kembali')" class="space-y-4 hidden">
             <div>
-                <label class="block text-sm font-medium text-gray-700">ID Peminjaman</label>
-                <input type="text" id="idKembali" required placeholder="Masukkan ID saat pinjam" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border">
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">ID Peminjaman</label>
+                <input type="text" id="idKembali" required placeholder="Masukkan ID angka saat pinjam" class="w-full rounded-xl border-slate-200 bg-slate-50 shadow-sm p-3 border text-sm focus:bg-white focus:ring-2 focus:ring-green-500 focus:outline-none">
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700">Dokumentasi Pengembalian (Foto)</label>
-                <input type="file" id="fotoKembali" accept="image/*" capture="environment" required class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100">
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Dokumentasi Pengembalian (Foto)</label>
+                <input type="file" id="fotoKembali" accept="image/*" capture="environment" required class="w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 cursor-pointer border border-slate-200 rounded-xl bg-slate-50 p-1">
             </div>
 
-            <button type="submit" id="btnSubmitKembali" class="w-full bg-green-600 text-white p-2 rounded-md hover:bg-green-700 font-semibold">Proses Pengembalian</button>
+            <button type="submit" id="btnSubmitKembali" class="w-full bg-green-600 text-white p-3.5 rounded-xl hover:bg-green-700 active:scale-[0.98] font-bold text-sm shadow-lg shadow-green-200 transition duration-200 mt-2">Proses Pengembalian</button>
         </form>
 
         <!-- Status Notifikasi -->
-        <div id="statusMsg" class="mt-4 text-center text-sm font-medium"></div>
+        <div id="statusMsg" class="mt-4 text-center text-xs font-semibold"></div>
     </div>
 
     <script>
@@ -83,14 +86,15 @@
             if (tab === 'pinjam') {
                 formPinjam.classList.remove('hidden');
                 formKembali.classList.add('hidden');
-                btnPinjamTab.className = "flex-1 py-2 text-center font-semibold text-blue-600 border-b-2 border-blue-600";
-                btnKembaliTab.className = "flex-1 py-2 text-center font-semibold text-gray-500";
+                btnPinjamTab.className = "flex-1 py-2.5 text-center text-sm font-bold rounded-lg transition-all duration-200 bg-white text-blue-600 shadow-sm";
+                btnKembaliTab.className = "flex-1 py-2.5 text-center text-sm font-bold rounded-lg transition-all duration-200 text-slate-500 hover:text-slate-800";
             } else {
                 formPinjam.classList.add('hidden');
                 formKembali.classList.remove('hidden');
-                btnKembaliTab.className = "flex-1 py-2 text-center font-semibold text-green-600 border-b-2 border-green-600";
-                btnPinjamTab.className = "flex-1 py-2 text-center font-semibold text-gray-500";
+                btnKembaliTab.className = "flex-1 py-2.5 text-center text-sm font-bold rounded-lg transition-all duration-200 bg-white text-green-600 shadow-sm";
+                btnPinjamTab.className = "flex-1 py-2.5 text-center text-sm font-bold rounded-lg transition-all duration-200 text-slate-500 hover:text-slate-800";
             }
+            document.getElementById('statusMsg').innerText = "";
         }
 
         function checkDivisi() {
@@ -107,9 +111,17 @@
 
         async function handleForm(event, action) {
             event.preventDefault();
+            
+            const submitBtn = action === 'pinjam' ? document.getElementById('btnSubmitPinjam') : document.getElementById('btnSubmitKembali');
             const statusMsg = document.getElementById('statusMsg');
-            statusMsg.innerText = "Mengirim data dan foto, mohon tunggu...";
-            statusMsg.className = "mt-4 text-center text-sm font-medium text-blue-600";
+
+            // Kunci tombol agar tidak bisa diklik ganda/double submit
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            submitBtn.innerText = "Mengirim data...";
+
+            statusMsg.innerText = "Sedang mengunggah foto & mengirim data, mohon tunggu...";
+            statusMsg.className = "mt-4 text-center text-xs font-semibold text-blue-600 animate-pulse";
 
             let payload = { action: action };
 
@@ -143,16 +155,21 @@
 
                 if (result.status === 'sukses') {
                     statusMsg.innerText = result.pesan;
-                    statusMsg.className = "mt-4 text-center text-sm font-medium text-green-600";
+                    statusMsg.className = "mt-4 text-center text-xs font-semibold text-green-600";
                     event.target.reset();
                     if(action === 'pinjam') checkDivisi();
                 } else {
                     statusMsg.innerText = "Error: " + result.pesan;
-                    statusMsg.className = "mt-4 text-center text-sm font-medium text-red-600";
+                    statusMsg.className = "mt-4 text-center text-xs font-semibold text-red-600";
                 }
             } catch (error) {
-                statusMsg.innerText = "Terjadi kesalahan koneksi!";
-                statusMsg.className = "mt-4 text-center text-sm font-medium text-red-600";
+                statusMsg.innerText = "Terjadi kesalahan koneksi internet!";
+                statusMsg.className = "mt-4 text-center text-xs font-semibold text-red-600";
+            } finally {
+                // Aktifkan kembali tombol setelah selesai
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                submitBtn.innerText = action === 'pinjam' ? "Simpan Peminjaman" : "Proses Pengembalian";
             }
         }
 
